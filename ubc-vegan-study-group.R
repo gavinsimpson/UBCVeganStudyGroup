@@ -2,7 +2,7 @@
 knitr::opts_chunk$set(comment=NA, fig.align = "center",
                       out.width = "0.7\\linewidth",
                       echo = TRUE, message = TRUE, warning = TRUE,
-                      cache = TRUE, width = 100)
+                      cache = TRUE, width = 140)
 knitr::knit_hooks$set(crop.plot = knitr::hook_pdfcrop)
 
 ## ----packages, echo = FALSE, results = "hide", message = FALSE-----------
@@ -11,7 +11,7 @@ data(varespec)
 data(varechem)
 
 ## ----cca-model-----------------------------------------------------------
-cca1 <- cca(varespec ~ ., data = varechem)
+cca1 <- cca(varespec ~ ., data = varechem) 
 cca1
 
 ## ----rda-model-----------------------------------------------------------
@@ -66,6 +66,16 @@ mods2
 ## ----cca-anova-----------------------------------------------------------
 set.seed(42)
 (perm <- anova(cca1, permutations = 499))
+
+## ----permustats-1--------------------------------------------------------
+pstat <- permustats(perm)
+summary(pstat)
+
+## ----permustats-2, fig.show = "hold", fig.width = 10, fig.height = 5-----
+layout(matrix(1:2, ncol = 2))
+plot(density(pstat))
+qqnorm(pstat)
+layout(1)
 
 ## ----anova-args, echo = FALSE--------------------------------------------
 args(anova.cca)
@@ -162,22 +172,17 @@ p <- shuffle(30, control = h)
 do.call("rbind", split(p, plt)) ## look at perms in context
 
 ## ----worked-example-devel-1----------------------------------------------
-## Analyse the Ohraz data Case study 5 of Leps & Smilauer
-
-## load vegan
-library("vegan")
-
 ## load the data
 spp <- read.csv("data/ohraz-spp.csv", header = TRUE, row.names = 1)
 env <- read.csv("data/ohraz-env.csv", header = TRUE, row.names = 1)
 molinia <- spp[, 1]
 spp <- spp[, -1]
 
-## Year as numeric
-env <- transform(env, year = as.numeric(as.character(year)))
+env <- transform(env, year = as.numeric(as.character(year))) # Year as numeric
 
 ## ----worked-example-devel-2----------------------------------------------
-c1 <- rda(spp ~ year + year:mowing + year:fertilizer + year:removal + Condition(plotid), data = env)
+c1 <- rda(spp ~ year + year:mowing + year:fertilizer + year:removal +
+              Condition(plotid), data = env)
 (h <- how(nperm = 499, within = Within(type = "none"),
           plots = with(env, Plots(strata = plotid, type = "free"))))
 
@@ -240,25 +245,38 @@ ctrl <- how(nperm = 499,
 ## ----crayfish-reach------------------------------------------------------
 m.re <- rda(crayfish ~ Reach + Condition(Stream), data = design)
 m.re
-summary(eigenvals(m.re))
 
+## ----crayfish-reach-2----------------------------------------------------
+summary(eigenvals(m.re))
 set.seed(1)
 ctrl <- how(nperm = 499,
             within = Within(type = "none"),
             plots = with(design, Plots(strata = Run, type = "free")),
             blocks = with(design, Stream))
-sig.re <- anova(m.re, permutations = ctrl)
-sig.re
+(sig.re <- anova(m.re, permutations = ctrl))
 
 ## ----crayfish-run--------------------------------------------------------
 m.run <- rda(crayfish ~ Run + Condition(Reach), data = design)
 m.run
-summary(eigenvals(m.run))
 
+## ----crayfish-run-2------------------------------------------------------
+summary(eigenvals(m.run))
 set.seed(1)
 ctrl <- how(nperm = 499,
             within = Within(type = "free"),
             blocks = with(design, Reach))
-sig.run <- anova(m.run, permutations = ctrl)
-sig.run
+(sig.run <- anova(m.run, permutations = ctrl))
+
+## ----goodness------------------------------------------------------------
+head(goodness(mods))
+head(goodness(mods, summarize = TRUE))
+
+## ----inertcomp-----------------------------------------------------------
+head(inertcomp(mods, proportional = TRUE))
+
+## ----spenvcor------------------------------------------------------------
+spenvcor(mods)
+
+## ----intersetcor---------------------------------------------------------
+intersetcor(mods)
 

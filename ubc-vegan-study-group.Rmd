@@ -24,7 +24,7 @@ output:
 knitr::opts_chunk$set(comment=NA, fig.align = "center",
                       out.width = "0.7\\linewidth",
                       echo = TRUE, message = TRUE, warning = TRUE,
-                      cache = TRUE, width = 100)
+                      cache = TRUE, width = 140)
 knitr::knit_hooks$set(crop.plot = knitr::hook_pdfcrop)
 ```
 
@@ -34,11 +34,19 @@ data(varespec)
 data(varechem)
 ```
 
+## Materials
+
+Handouts and all the sources are on [github](https://github.com/gavinsimpson/UBCVeganStudyGroup):
+
+[github.com/gavinsimpson/UBCVeganStudyGroup](https://github.com/gavinsimpson/UBCVeganStudyGroup)
+
 # Constrained Ordination
 
 ## Canonical Correspondence Analysis
 
-CCA is the constrained form of CA; fitted using `cca()`.
+CCA is the constrained form of CA; fitted using `cca()`
+
+Finds axes that are **linear** combinations of the explanatory variables
 
 Two interfaces for specifying models
 
@@ -51,7 +59,7 @@ Formula interface is the more powerful --- *recommended*
 
 \tiny
 ```{r cca-model}
-cca1 <- cca(varespec ~ ., data = varechem)
+cca1 <- cca(varespec ~ ., data = varechem) 
 cca1
 ```
 \normalsize
@@ -66,40 +74,6 @@ rda1 <- rda(varespec ~ ., data = varechem)
 rda1
 ```
 \normalsize
-
-## The `cca.object`
-
- * Objects of class `"cca"` are complex with many components
- * Entire class described in `?cca.object`
- * Depending on what analysis performed some components may be `NULL`
- * Used for (C)CA, PCA, RDA, and CAP (`capscale()`)
-
-## The `cca.object`
-
-`cca1` has a large number of components
-
- * **`$call`** how the function was called
- * **`$grand.total`** in (C)CA sum of `rowsum}
- * **`$rowsum`** the row sums
- * **`$colsum`** the column sums
- * **`$tot.chi`** total inertia, sum of Eigenvalues
- * **`$pCCA`** Conditioned (partial-ed out) components
- * **`$CCA`** Constrained components
- * **`$CA`** Unconstrained components
- * **`$method`** Ordination method used
- * **`$inertia`** Description of what inertia is
-
-## The `cca.object`
-
-Depending on how one called `cca()` etc some of these components will be `NULL`
-
-`$pCCA` is only filled in if a *partial* constrained ordination fitted
-
-`rda()` returns objects with classes `"rda"` and `"cca"`, but in most cases those objects work like those of class `"cca"`
-
-The Eigenvalues and axis scores are now spread about the `$CA` and `$CCA` components (also `$pCCA` if a *partial* CCA)
-
-Thankfully we can use *extractor* functions to get at such things
 
 ## Eigenvalues
 
@@ -166,6 +140,22 @@ Can't display all of these and maintain relationships between the scores
 scores(cca1, choices = 1:2, display = "species", scaling = 3)
 ```
 \normalsize
+
+## Scalings...
+
+From vegan version `2.3-1` we have a simpler way to select the type of scaling
+
+`scaling` can be a character vector indicating the broad type of scaling required
+
+* `"species"`
+* `"sites"`
+* `"symmetric"`
+* `"none"`
+
+A second argument then allows selection of the relevant negative scaling type:
+
+* `correlation = TRUE` for linear methods
+* `hill = TRUE` for unimodal methods
 
 ## Partial constrained ordinations
 
@@ -237,19 +227,6 @@ But automatic approaches to model building should be used cautiously!
 The standard `step()` function can be used as **vegan** provides two helper methods, `deviance()` and `extractAIC()`, used by `step()`
 
 Vegan also provides methods for class `"cca"` for `add1()` and `drop1()`
-
-<!-- ## Variance inflation factors -->
-
-<!-- *Linear* dependencies between constraints can be investigated via the *variance inflation factor* or VIF -->
-
-<!-- VIF is a measure of how much the variance of $\hat{\beta}_j$ is inflated by presence of other covariates -->
-
-<!-- Lots of rules of thumb -->
-
-<!--  * VIF >= 20 indicates *strong collinearity* in constraints -->
-<!--  * VIF >= 10 potentially of concern & should be looked at -->
-
-<!-- Computed via `vif.cca()` -->
 
 ## Stepwise selection in CCA
 
@@ -346,10 +323,10 @@ Instead we use permutation tests to assess the *importance* of fitted models ---
 
 What *is* shuffled and *how* is of **paramount** importance for the test to be valid
 
- * No conditioning (partial) variables then rows of the species data are permuted
+ * If no conditioning (partial) variables then rows of the species data are permuted
  * With conditioning variables, two options are available, both of which *permute residuals* from model fits
      - The *full model* uses residuals from model $Y = X + Z + \varepsilon$
-     - The *reduced model* uses residuals from model $Y = X + Z + \varepsilon$
+     - The *reduced model* uses residuals from model $Y = Z + \varepsilon$
  * In **vegan** which is used can be set via argument `model` with `"direct"`, ~~`"full"`~~, and `"reduced"` respectively
  * In current **vegan** option `method = "full"` is disabled
 
@@ -374,6 +351,30 @@ Evaluate whether $F$ is unusually large relative to the null (permutation) distr
 ```{r cca-anova}
 set.seed(42)
 (perm <- anova(cca1, permutations = 499))
+```
+\normalsize
+
+## Details on the permutations --- `permustats`
+
+To get details on the permutations use `permustats()`
+
+\scriptsize
+```{r permustats-1}
+pstat <- permustats(perm)
+summary(pstat)
+```
+\normalsize
+
+## Details on the permutations --- `permustats`
+
+To get details on the permutations use `permustats()`
+
+\scriptsize
+```{r permustats-2, fig.show = "hold", fig.width = 10, fig.height = 5}
+layout(matrix(1:2, ncol = 2))
+plot(density(pstat))
+qqnorm(pstat)
+layout(1)
 ```
 \normalsize
 
@@ -553,77 +554,7 @@ m5$anova
  * `spenvcor()`
  * `intersetcor()`
  * `vif.caa()`
- 
-<!-- ## Diagnostics for constrained ordinations | goodness of fit -->
 
-<!-- `goodness()` computes two goodness of fit statistics for species or sites -->
-
-<!-- Which goodness of fit measure is returned is controlled by argument `statistic` -->
-
-<!--  * `statistic = "explained` (default) gives the cumulative proportion of variance explained by each axis -->
-<!--  * `statistic = "distance"` gives the residual distance between the "fitted" location in constrained ordination space and the location in the full dimensional space -->
-
-<!-- ## Diagnostics for constrained ordinations | goodness of fit -->
-
-<!-- \scriptsize -->
-<!-- ```{r goodness} -->
-<!-- head(goodness(mods)) -->
-<!-- head(goodness(mods, summarize = TRUE)) -->
-<!-- ``` -->
-<!-- \normalsize -->
-
-<!-- ## Diagnostics for constrained ordinations | inertia decomposition -->
-
-<!-- `inertcomp()` decomposes the variance in samples or species in partial, constrained, and unconstrained components -->
-
-<!-- Same two types of  measure available by argument `statistic` -->
-
-<!--  * `statistic = "explained` (default) gives the decomposition in terms of variance -->
-<!--  * `statistic = "distance"` gives decomposition in terms of the the residual distance -->
-<!--  * Can output as proportions of total via `proportion = TRUE` -->
-
-<!-- \scriptsize -->
-<!-- ```{r inertcomp} -->
-<!-- head(inertcomp(mods, proportional = TRUE)) -->
-<!-- ``` -->
-<!-- \normalsize -->
-
-<!-- ## Diagnostics for constrained ordinations | species-environment correlations -->
-
-<!-- `spenvcor()` returns the species-environment correlation -->
-
-<!-- The (weighted) correlation between the weighted average-based and the linear combination-based sets of site scores -->
-
-<!-- A *poor* measure of goodness of fit. Sensitive to -->
-
-<!--  * outliers (like all correlations) -->
-<!--  * overfitting (using too many constraints) -->
-
-<!-- Better models can have poorer species-environment correlations -->
-
-<!-- \scriptsize -->
-<!-- ```{r spenvcor} -->
-<!-- spenvcor(mods) -->
-<!-- ``` -->
-<!-- \normalsize -->
-
-<!-- ## Diagnostics for constrained ordinations | interset correlations -->
-
-<!-- `intersetcor()` returns the interset correlations; the (weighted) correlation between the weighted average-based site scores and each constraint variable -->
-
-<!-- Another *poor* diagnostic -->
-
-<!--  * correlation based -->
-<!--  * focuses on a single constraint--axis combination at a time -->
-
-<!-- Vector fitting (`envfit()`) or biplot scores (`scores(model, display = "bp")`) are better alternatives -->
-
-<!-- \scriptsize -->
-<!-- ```{r intersetcor} -->
-<!-- intersetcor(mods) -->
-<!-- ``` -->
-<!-- \normalsize -->
-	
 # Restricted permutation tests
 
 ## Restricted permutation tests
@@ -871,29 +802,39 @@ do.call("rbind", split(p, plt)) ## look at perms in context
 
 Now we've seen how to drive **permute**, we can use the same `how()` commands to set up permutation designs within **vegan** functions
 
+Analyse the Ohraz data Case study 5 of Leps & Smilauer
+
+Repeated observations of composition from an experiment
+
+* Factorial design (3 replicates)
+* Treatments: fertilisation, mowing, *Molinia* removal
+
+Test 1 of the hypotheses
+
+> There are *no* directional changes in species composition in time that are common to all treatments or specific treatments
+
+## Restricted permutations with permute | worked example with vegan
+
+Analyse the Ohraz data Case study 5 of Leps & Smilauer
+
 \scriptsize
 ```{r worked-example-devel-1}
-## Analyse the Ohraz data Case study 5 of Leps & Smilauer
-
-## load vegan
-library("vegan")
-
 ## load the data
 spp <- read.csv("data/ohraz-spp.csv", header = TRUE, row.names = 1)
 env <- read.csv("data/ohraz-env.csv", header = TRUE, row.names = 1)
 molinia <- spp[, 1]
 spp <- spp[, -1]
 
-## Year as numeric
-env <- transform(env, year = as.numeric(as.character(year)))
+env <- transform(env, year = as.numeric(as.character(year))) # Year as numeric
 ```
 \normalsize
 
 ## Restricted permutations with permute | worked example with vegan
 
-\scriptsize
+\tiny
 ```{r worked-example-devel-2}
-c1 <- rda(spp ~ year + year:mowing + year:fertilizer + year:removal + Condition(plotid), data = env)
+c1 <- rda(spp ~ year + year:mowing + year:fertilizer + year:removal +
+              Condition(plotid), data = env)
 (h <- how(nperm = 499, within = Within(type = "none"),
           plots = with(env, Plots(strata = plotid, type = "free"))))
 ```
@@ -1003,33 +944,165 @@ ctrl <- how(nperm = 499,
 \normalsize
 
 ## Hierarchical analysis of crayfish --- Reach scale
+\tiny
 ```{r crayfish-reach}
 m.re <- rda(crayfish ~ Reach + Condition(Stream), data = design)
 m.re
-summary(eigenvals(m.re))
+```
+\normalsize
 
+## Hierarchical analysis of crayfish --- Reach scale
+\tiny
+```{r crayfish-reach-2}
+summary(eigenvals(m.re))
 set.seed(1)
 ctrl <- how(nperm = 499,
             within = Within(type = "none"),
             plots = with(design, Plots(strata = Run, type = "free")),
             blocks = with(design, Stream))
-sig.re <- anova(m.re, permutations = ctrl)
-sig.re
+(sig.re <- anova(m.re, permutations = ctrl))
 ```
+\normalsize
 
 ## Hierarchical analysis of crayfish --- Run scale
+\tiny
 ```{r crayfish-run}
 m.run <- rda(crayfish ~ Run + Condition(Reach), data = design)
 m.run
-summary(eigenvals(m.run))
+```
+\normalsize
 
+## Hierarchical analysis of crayfish --- Run scale
+\tiny
+```{r crayfish-run-2}
+summary(eigenvals(m.run))
 set.seed(1)
 ctrl <- how(nperm = 499,
             within = Within(type = "free"),
             blocks = with(design, Reach))
-sig.run <- anova(m.run, permutations = ctrl)
-sig.run
+(sig.run <- anova(m.run, permutations = ctrl))
 ```
+\normalsize
+
+# Other stuff
+
+## The `cca.object`
+
+ * Objects of class `"cca"` are complex with many components
+ * Entire class described in `?cca.object`
+ * Depending on what analysis performed some components may be `NULL`
+ * Used for (C)CA, PCA, RDA, and CAP (`capscale()`)
+
+## The `cca.object`
+
+`cca1` has a large number of components
+
+ * **`$call`** how the function was called
+ * **`$grand.total`** in (C)CA sum of `rowsum}
+ * **`$rowsum`** the row sums
+ * **`$colsum`** the column sums
+ * **`$tot.chi`** total inertia, sum of Eigenvalues
+ * **`$pCCA`** Conditioned (partial-ed out) components
+ * **`$CCA`** Constrained components
+ * **`$CA`** Unconstrained components
+ * **`$method`** Ordination method used
+ * **`$inertia`** Description of what inertia is
+
+## The `cca.object`
+
+Depending on how one called `cca()` etc some of these components will be `NULL`
+
+`$pCCA` is only filled in if a *partial* constrained ordination fitted
+
+`rda()` returns objects with classes `"rda"` and `"cca"`, but in most cases those objects work like those of class `"cca"`
+
+The Eigenvalues and axis scores are now spread about the `$CA` and `$CCA` components (also `$pCCA` if a *partial* CCA)
+
+Thankfully we can use *extractor* functions to get at such things
+
+ 
+## Diagnostics for constrained ordinations | goodness of fit
+
+`goodness()` computes two goodness of fit statistics for species or sites
+
+Which goodness of fit measure is returned is controlled by argument `statistic`
+
+ * `statistic = "explained` (default) gives the cumulative proportion of variance explained by each axis
+ * `statistic = "distance"` gives the residual distance between the "fitted" location in constrained ordination space and the location in the full dimensional space
+
+## Diagnostics for constrained ordinations | goodness of fit
+
+\scriptsize
+```{r goodness}
+head(goodness(mods))
+head(goodness(mods, summarize = TRUE))
+```
+\normalsize
+
+## Diagnostics for constrained ordinations | inertia decomposition
+
+`inertcomp()` decomposes the variance in samples or species in partial, constrained, and unconstrained components
+
+Same two types of  measure available by argument `statistic`
+
+ * `statistic = "explained` (default) gives the decomposition in terms of variance
+ * `statistic = "distance"` gives decomposition in terms of the the residual distance
+ * Can output as proportions of total via `proportion = TRUE`
+
+\scriptsize
+```{r inertcomp}
+head(inertcomp(mods, proportional = TRUE))
+```
+\normalsize
+
+## Diagnostics for constrained ordinations | species-environment correlations
+
+`spenvcor()` returns the species-environment correlation
+
+The (weighted) correlation between the weighted average-based and the linear combination-based sets of site scores
+
+A *poor* measure of goodness of fit. Sensitive to
+
+ * outliers (like all correlations)
+ * overfitting (using too many constraints)
+
+Better models can have poorer species-environment correlations
+
+\scriptsize
+```{r spenvcor}
+spenvcor(mods)
+```
+\normalsize
+
+## Diagnostics for constrained ordinations | interset correlations
+
+`intersetcor()` returns the interset correlations; the (weighted) correlation between the weighted average-based site scores and each constraint variable
+
+Another *poor* diagnostic
+
+ * correlation based
+ * focuses on a single constraint--axis combination at a time
+
+Vector fitting (`envfit()`) or biplot scores (`scores(model, display = "bp")`) are better alternatives
+
+\scriptsize
+```{r intersetcor}
+intersetcor(mods)
+```
+\normalsize
+
+## Variance inflation factors
+
+*Linear* dependencies between constraints can be investigated via the *variance inflation factor* or VIF
+
+VIF is a measure of how much the variance of $\hat{\beta}_j$ is inflated by presence of other covariates
+
+Lots of rules of thumb
+
+ * VIF >= 20 indicates *strong collinearity* in constraints
+ * VIF >= 10 potentially of concern & should be looked at
+
+Computed via `vif.cca()`
 
 ## Re-use
 

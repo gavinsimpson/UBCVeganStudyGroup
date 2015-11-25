@@ -102,11 +102,23 @@
 \begin{document}
 \frame{\titlepage}
 
+\begin{frame}{Materials}
+
+Handouts and all the sources are on
+\href{https://github.com/gavinsimpson/UBCVeganStudyGroup}{github}:
+
+\href{https://github.com/gavinsimpson/UBCVeganStudyGroup}{github.com/gavinsimpson/UBCVeganStudyGroup}
+
+\end{frame}
+
 \section{Constrained Ordination}\label{constrained-ordination}
 
 \begin{frame}{Canonical Correspondence Analysis}
 
-CCA is the constrained form of CA; fitted using \texttt{cca()}.
+CCA is the constrained form of CA; fitted using \texttt{cca()}
+
+Finds axes that are \textbf{linear} combinations of the explanatory
+variables
 
 Two interfaces for specifying models
 
@@ -130,7 +142,7 @@ Formula interface is the more powerful --- \emph{recommended}
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{cca1 <-}\StringTok{ }\KeywordTok{cca}\NormalTok{(varespec ~}\StringTok{ }\NormalTok{., }\DataTypeTok{data =} \NormalTok{varechem)}
+\NormalTok{cca1 <-}\StringTok{ }\KeywordTok{cca}\NormalTok{(varespec ~}\StringTok{ }\NormalTok{., }\DataTypeTok{data =} \NormalTok{varechem) }
 \NormalTok{cca1}
 \end{Highlighting}
 \end{Shaded}
@@ -195,73 +207,6 @@ Eigenvalues for unconstrained axes:
 \end{verbatim}
 
 \normalsize
-
-\end{frame}
-
-\begin{frame}{The \texttt{cca.object}}
-
-\begin{itemize}
-\itemsep1pt\parskip0pt\parsep0pt
-\item
-  Objects of class \texttt{"cca"} are complex with many components
-\item
-  Entire class described in \texttt{?cca.object}
-\item
-  Depending on what analysis performed some components may be
-  \texttt{NULL}
-\item
-  Used for (C)CA, PCA, RDA, and CAP (\texttt{capscale()})
-\end{itemize}
-
-\end{frame}
-
-\begin{frame}{The \texttt{cca.object}}
-
-\texttt{cca1} has a large number of components
-
-\begin{itemize}
-\itemsep1pt\parskip0pt\parsep0pt
-\item
-  \textbf{\texttt{\$call}} how the function was called
-\item
-  \textbf{\texttt{\$grand.total}} in (C)CA sum of `rowsum\}
-\item
-  \textbf{\texttt{\$rowsum}} the row sums
-\item
-  \textbf{\texttt{\$colsum}} the column sums
-\item
-  \textbf{\texttt{\$tot.chi}} total inertia, sum of Eigenvalues
-\item
-  \textbf{\texttt{\$pCCA}} Conditioned (partial-ed out) components
-\item
-  \textbf{\texttt{\$CCA}} Constrained components
-\item
-  \textbf{\texttt{\$CA}} Unconstrained components
-\item
-  \textbf{\texttt{\$method}} Ordination method used
-\item
-  \textbf{\texttt{\$inertia}} Description of what inertia is
-\end{itemize}
-
-\end{frame}
-
-\begin{frame}{The \texttt{cca.object}}
-
-Depending on how one called \texttt{cca()} etc some of these components
-will be \texttt{NULL}
-
-\texttt{\$pCCA} is only filled in if a \emph{partial} constrained
-ordination fitted
-
-\texttt{rda()} returns objects with classes \texttt{"rda"} and
-\texttt{"cca"}, but in most cases those objects work like those of class
-\texttt{"cca"}
-
-The Eigenvalues and axis scores are now spread about the \texttt{\$CA}
-and \texttt{\$CCA} components (also \texttt{\$pCCA} if a \emph{partial}
-CCA)
-
-Thankfully we can use \emph{extractor} functions to get at such things
 
 \end{frame}
 
@@ -440,6 +385,39 @@ Can't display all of these and maintain relationships between the scores
 \end{Shaded}
 
 \normalsize
+
+\end{frame}
+
+\begin{frame}{Scalings\ldots{}}
+
+From vegan version \texttt{2.3-1} we have a simpler way to select the
+type of scaling
+
+\texttt{scaling} can be a character vector indicating the broad type of
+scaling required
+
+\begin{itemize}
+\itemsep1pt\parskip0pt\parsep0pt
+\item
+  \texttt{"species"}
+\item
+  \texttt{"sites"}
+\item
+  \texttt{"symmetric"}
+\item
+  \texttt{"none"}
+\end{itemize}
+
+A second argument then allows selection of the relevant negative scaling
+type:
+
+\begin{itemize}
+\itemsep1pt\parskip0pt\parsep0pt
+\item
+  \texttt{correlation\ =\ TRUE} for linear methods
+\item
+  \texttt{hill\ =\ TRUE} for unimodal methods
+\end{itemize}
 
 \end{frame}
 
@@ -820,8 +798,8 @@ importance for the test to be valid
 \begin{itemize}
 \itemsep1pt\parskip0pt\parsep0pt
 \item
-  No conditioning (partial) variables then rows of the species data are
-  permuted
+  If no conditioning (partial) variables then rows of the species data
+  are permuted
 \item
   With conditioning variables, two options are available, both of which
   \emph{permute residuals} from model fits
@@ -833,7 +811,7 @@ importance for the test to be valid
     \(Y = X + Z + \varepsilon\)
   \item
     The \emph{reduced model} uses residuals from model
-    \(Y = X + Z + \varepsilon\)
+    \(Y = Z + \varepsilon\)
   \end{itemize}
 \item
   In \textbf{vegan} which is used can be set via argument \texttt{model}
@@ -896,6 +874,54 @@ Residual  9   0.64171
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 \end{verbatim}
+
+\normalsize
+
+\end{frame}
+
+\begin{frame}[fragile]{Details on the permutations ---
+\texttt{permustats}}
+
+To get details on the permutations use \texttt{permustats()}
+
+\scriptsize
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{pstat <-}\StringTok{ }\KeywordTok{permustats}\NormalTok{(perm)}
+\KeywordTok{summary}\NormalTok{(pstat)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+
+      statistic    SES   mean lower median  upper
+Model    1.4441 1.9675 1.0513       1.0266 1.4190
+
+(Interval (Upper - Lower) = 0.95)
+\end{verbatim}
+
+\normalsize
+
+\end{frame}
+
+\begin{frame}[fragile]{Details on the permutations ---
+\texttt{permustats}}
+
+To get details on the permutations use \texttt{permustats()}
+
+\scriptsize
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{layout}\NormalTok{(}\KeywordTok{matrix}\NormalTok{(}\DecValTok{1}\NormalTok{:}\DecValTok{2}\NormalTok{, }\DataTypeTok{ncol =} \DecValTok{2}\NormalTok{))}
+\KeywordTok{plot}\NormalTok{(}\KeywordTok{density}\NormalTok{(pstat))}
+\KeywordTok{qqnorm}\NormalTok{(pstat)}
+\KeywordTok{layout}\NormalTok{(}\DecValTok{1}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{center}\includegraphics[width=0.7\linewidth]{ubc-vegan-study-group_files/figure-beamer/permustats-2-1} \end{center}
 
 \normalsize
 
@@ -1759,7 +1785,7 @@ demanding 9999 permutations when there are only 10
 
 \begin{verbatim}
 function (within = Within(), plots = Plots(), blocks = NULL, 
-    nperm = 199, complete = FALSE, maxperm = 9999, minperm = 5040, 
+    nperm = 199, complete = FALSE, maxperm = 9999, minperm = 99, 
     all.perms = NULL, make = TRUE, observed = FALSE) 
 NULL
 \end{verbatim}
@@ -1827,30 +1853,50 @@ each
 
 \end{frame}
 
-\begin{frame}[fragile]{Restricted permutations with permute \textbar{}
-worked example with vegan}
+\begin{frame}{Restricted permutations with permute \textbar{} worked
+example with vegan}
 
 Now we've seen how to drive \textbf{permute}, we can use the same
 \texttt{how()} commands to set up permutation designs within
 \textbf{vegan} functions
 
+Analyse the Ohraz data Case study 5 of Leps \& Smilauer
+
+Repeated observations of composition from an experiment
+
+\begin{itemize}
+\itemsep1pt\parskip0pt\parsep0pt
+\item
+  Factorial design (3 replicates)
+\item
+  Treatments: fertilisation, mowing, \emph{Molinia} removal
+\end{itemize}
+
+Test 1 of the hypotheses
+
+\begin{quote}
+There are \emph{no} directional changes in species composition in time
+that are common to all treatments or specific treatments
+\end{quote}
+
+\end{frame}
+
+\begin{frame}[fragile]{Restricted permutations with permute \textbar{}
+worked example with vegan}
+
+Analyse the Ohraz data Case study 5 of Leps \& Smilauer
+
 \scriptsize
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{## Analyse the Ohraz data Case study 5 of Leps & Smilauer}
-
-\NormalTok{## load vegan}
-\KeywordTok{library}\NormalTok{(}\StringTok{"vegan"}\NormalTok{)}
-
 \NormalTok{## load the data}
 \NormalTok{spp <-}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(}\StringTok{"data/ohraz-spp.csv"}\NormalTok{, }\DataTypeTok{header =} \OtherTok{TRUE}\NormalTok{, }\DataTypeTok{row.names =} \DecValTok{1}\NormalTok{)}
 \NormalTok{env <-}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(}\StringTok{"data/ohraz-env.csv"}\NormalTok{, }\DataTypeTok{header =} \OtherTok{TRUE}\NormalTok{, }\DataTypeTok{row.names =} \DecValTok{1}\NormalTok{)}
 \NormalTok{molinia <-}\StringTok{ }\NormalTok{spp[, }\DecValTok{1}\NormalTok{]}
 \NormalTok{spp <-}\StringTok{ }\NormalTok{spp[, -}\DecValTok{1}\NormalTok{]}
 
-\NormalTok{## Year as numeric}
-\NormalTok{env <-}\StringTok{ }\KeywordTok{transform}\NormalTok{(env, }\DataTypeTok{year =} \KeywordTok{as.numeric}\NormalTok{(}\KeywordTok{as.character}\NormalTok{(year)))}
+\NormalTok{env <-}\StringTok{ }\KeywordTok{transform}\NormalTok{(env, }\DataTypeTok{year =} \KeywordTok{as.numeric}\NormalTok{(}\KeywordTok{as.character}\NormalTok{(year))) }\CommentTok{# Year as numeric}
 \end{Highlighting}
 \end{Shaded}
 
@@ -1861,11 +1907,12 @@ Now we've seen how to drive \textbf{permute}, we can use the same
 \begin{frame}[fragile]{Restricted permutations with permute \textbar{}
 worked example with vegan}
 
-\scriptsize
+\tiny
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{c1 <-}\StringTok{ }\KeywordTok{rda}\NormalTok{(spp ~}\StringTok{ }\NormalTok{year +}\StringTok{ }\NormalTok{year:mowing +}\StringTok{ }\NormalTok{year:fertilizer +}\StringTok{ }\NormalTok{year:removal +}\StringTok{ }\KeywordTok{Condition}\NormalTok{(plotid), }\DataTypeTok{data =} \NormalTok{env)}
+\NormalTok{c1 <-}\StringTok{ }\KeywordTok{rda}\NormalTok{(spp ~}\StringTok{ }\NormalTok{year +}\StringTok{ }\NormalTok{year:mowing +}\StringTok{ }\NormalTok{year:fertilizer +}\StringTok{ }\NormalTok{year:removal +}
+\StringTok{              }\KeywordTok{Condition}\NormalTok{(plotid), }\DataTypeTok{data =} \NormalTok{env)}
 \NormalTok{(h <-}\StringTok{ }\KeywordTok{how}\NormalTok{(}\DataTypeTok{nperm =} \DecValTok{499}\NormalTok{, }\DataTypeTok{within =} \KeywordTok{Within}\NormalTok{(}\DataTypeTok{type =} \StringTok{"none"}\NormalTok{),}
           \DataTypeTok{plots =} \KeywordTok{with}\NormalTok{(env, }\KeywordTok{Plots}\NormalTok{(}\DataTypeTok{strata =} \NormalTok{plotid, }\DataTypeTok{type =} \StringTok{"free"}\NormalTok{))))}
 \end{Highlighting}
@@ -1887,9 +1934,9 @@ Within Plots:
   Permutation type: none
 
 Permutation details:
-  Number of permutations: 499
+  Number of permutations requested: 499
   Max. number of permutations allowed: 9999
-  Evaluate all permutations?: No.  Activation limit: 5040
+  Evaluate all permutations?: No.  Activation limit: 99
 \end{verbatim}
 
 \end{frame}
@@ -2216,6 +2263,8 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 \begin{frame}[fragile]{Hierarchical analysis of crayfish --- Reach
 scale}
 
+\tiny
+
 \begin{Shaded}
 \begin{Highlighting}[]
 \NormalTok{m.re <-}\StringTok{ }\KeywordTok{rda}\NormalTok{(crayfish ~}\StringTok{ }\NormalTok{Reach +}\StringTok{ }\KeywordTok{Condition}\NormalTok{(Stream), }\DataTypeTok{data =} \NormalTok{design)}
@@ -2243,6 +2292,15 @@ Eigenvalues for unconstrained axes:
    PC1    PC2    PC3    PC4    PC5    PC6    PC7    PC8    PC9   PC10 
 2.1635 0.6080 0.5605 0.5166 0.3749 0.2212 0.2052 0.1588 0.1477 0.0040 
 \end{verbatim}
+
+\normalsize
+
+\end{frame}
+
+\begin{frame}[fragile]{Hierarchical analysis of crayfish --- Reach
+scale}
+
+\tiny
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -2277,8 +2335,7 @@ Cumulative Proportion 0.99938 1.000000
             \DataTypeTok{within =} \KeywordTok{Within}\NormalTok{(}\DataTypeTok{type =} \StringTok{"none"}\NormalTok{),}
             \DataTypeTok{plots =} \KeywordTok{with}\NormalTok{(design, }\KeywordTok{Plots}\NormalTok{(}\DataTypeTok{strata =} \NormalTok{Run, }\DataTypeTok{type =} \StringTok{"free"}\NormalTok{)),}
             \DataTypeTok{blocks =} \KeywordTok{with}\NormalTok{(design, Stream))}
-\NormalTok{sig.re <-}\StringTok{ }\KeywordTok{anova}\NormalTok{(m.re, }\DataTypeTok{permutations =} \NormalTok{ctrl)}
-\NormalTok{sig.re}
+\NormalTok{(sig.re <-}\StringTok{ }\KeywordTok{anova}\NormalTok{(m.re, }\DataTypeTok{permutations =} \NormalTok{ctrl))}
 \end{Highlighting}
 \end{Shaded}
 
@@ -2297,9 +2354,13 @@ Residual 504   4.9603
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 \end{verbatim}
 
+\normalsize
+
 \end{frame}
 
 \begin{frame}[fragile]{Hierarchical analysis of crayfish --- Run scale}
+
+\tiny
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -2328,6 +2389,14 @@ Eigenvalues for unconstrained axes:
    PC1    PC2    PC3    PC4    PC5    PC6    PC7    PC8    PC9   PC10 
 1.3137 0.4165 0.3832 0.2759 0.2378 0.1725 0.1215 0.1130 0.1016 0.0021 
 \end{verbatim}
+
+\normalsize
+
+\end{frame}
+
+\begin{frame}[fragile]{Hierarchical analysis of crayfish --- Run scale}
+
+\tiny
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -2361,8 +2430,7 @@ Cumulative Proportion 0.99957 1.000000
 \NormalTok{ctrl <-}\StringTok{ }\KeywordTok{how}\NormalTok{(}\DataTypeTok{nperm =} \DecValTok{499}\NormalTok{,}
             \DataTypeTok{within =} \KeywordTok{Within}\NormalTok{(}\DataTypeTok{type =} \StringTok{"free"}\NormalTok{),}
             \DataTypeTok{blocks =} \KeywordTok{with}\NormalTok{(design, Reach))}
-\NormalTok{sig.run <-}\StringTok{ }\KeywordTok{anova}\NormalTok{(m.run, }\DataTypeTok{permutations =} \NormalTok{ctrl)}
-\NormalTok{sig.run}
+\NormalTok{(sig.run <-}\StringTok{ }\KeywordTok{anova}\NormalTok{(m.run, }\DataTypeTok{permutations =} \NormalTok{ctrl))}
 \end{Highlighting}
 \end{Shaded}
 
@@ -2379,6 +2447,276 @@ Residual 378   3.1378
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 \end{verbatim}
+
+\normalsize
+
+\end{frame}
+
+\section{Other stuff}\label{other-stuff}
+
+\begin{frame}{The \texttt{cca.object}}
+
+\begin{itemize}
+\itemsep1pt\parskip0pt\parsep0pt
+\item
+  Objects of class \texttt{"cca"} are complex with many components
+\item
+  Entire class described in \texttt{?cca.object}
+\item
+  Depending on what analysis performed some components may be
+  \texttt{NULL}
+\item
+  Used for (C)CA, PCA, RDA, and CAP (\texttt{capscale()})
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{The \texttt{cca.object}}
+
+\texttt{cca1} has a large number of components
+
+\begin{itemize}
+\itemsep1pt\parskip0pt\parsep0pt
+\item
+  \textbf{\texttt{\$call}} how the function was called
+\item
+  \textbf{\texttt{\$grand.total}} in (C)CA sum of `rowsum\}
+\item
+  \textbf{\texttt{\$rowsum}} the row sums
+\item
+  \textbf{\texttt{\$colsum}} the column sums
+\item
+  \textbf{\texttt{\$tot.chi}} total inertia, sum of Eigenvalues
+\item
+  \textbf{\texttt{\$pCCA}} Conditioned (partial-ed out) components
+\item
+  \textbf{\texttt{\$CCA}} Constrained components
+\item
+  \textbf{\texttt{\$CA}} Unconstrained components
+\item
+  \textbf{\texttt{\$method}} Ordination method used
+\item
+  \textbf{\texttt{\$inertia}} Description of what inertia is
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{The \texttt{cca.object}}
+
+Depending on how one called \texttt{cca()} etc some of these components
+will be \texttt{NULL}
+
+\texttt{\$pCCA} is only filled in if a \emph{partial} constrained
+ordination fitted
+
+\texttt{rda()} returns objects with classes \texttt{"rda"} and
+\texttt{"cca"}, but in most cases those objects work like those of class
+\texttt{"cca"}
+
+The Eigenvalues and axis scores are now spread about the \texttt{\$CA}
+and \texttt{\$CCA} components (also \texttt{\$pCCA} if a \emph{partial}
+CCA)
+
+Thankfully we can use \emph{extractor} functions to get at such things
+
+\end{frame}
+
+\begin{frame}{Diagnostics for constrained ordinations \textbar{}
+goodness of fit}
+
+\texttt{goodness()} computes two goodness of fit statistics for species
+or sites
+
+Which goodness of fit measure is returned is controlled by argument
+\texttt{statistic}
+
+\begin{itemize}
+\itemsep1pt\parskip0pt\parsep0pt
+\item
+  \texttt{statistic\ =\ "explained} (default) gives the cumulative
+  proportion of variance explained by each axis
+\item
+  \texttt{statistic\ =\ "distance"} gives the residual distance between
+  the ``fitted'' location in constrained ordination space and the
+  location in the full dimensional space
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]{Diagnostics for constrained ordinations
+\textbar{} goodness of fit}
+
+\scriptsize
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{head}\NormalTok{(}\KeywordTok{goodness}\NormalTok{(mods))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+                 CCA1        CCA2      CCA3
+Callvulg 0.0062471656 0.318907619 0.8254657
+Empenigr 0.1164701677 0.137604904 0.1953245
+Rhodtome 0.0999089739 0.169697909 0.1824153
+Vaccmyrt 0.2361482843 0.240516323 0.2406730
+Vaccviti 0.1523704591 0.156502301 0.2110550
+Pinusylv 0.0009244423 0.004802076 0.0060096
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{head}\NormalTok{(}\KeywordTok{goodness}\NormalTok{(mods, }\DataTypeTok{summarize =} \OtherTok{TRUE}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+ Callvulg  Empenigr  Rhodtome  Vaccmyrt  Vaccviti  Pinusylv 
+0.8254657 0.1953245 0.1824153 0.2406730 0.2110550 0.0060096 
+\end{verbatim}
+
+\normalsize
+
+\end{frame}
+
+\begin{frame}[fragile]{Diagnostics for constrained ordinations
+\textbar{} inertia decomposition}
+
+\texttt{inertcomp()} decomposes the variance in samples or species in
+partial, constrained, and unconstrained components
+
+Same two types of measure available by argument \texttt{statistic}
+
+\begin{itemize}
+\itemsep1pt\parskip0pt\parsep0pt
+\item
+  \texttt{statistic\ =\ "explained} (default) gives the decomposition in
+  terms of variance
+\item
+  \texttt{statistic\ =\ "distance"} gives decomposition in terms of the
+  the residual distance
+\item
+  Can output as proportions of total via \texttt{proportion\ =\ TRUE}
+\end{itemize}
+
+\scriptsize
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{head}\NormalTok{(}\KeywordTok{inertcomp}\NormalTok{(mods, }\DataTypeTok{proportional =} \OtherTok{TRUE}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+               CCA        CA
+Callvulg 0.8254657 0.1745343
+Empenigr 0.1953245 0.8046755
+Rhodtome 0.1824153 0.8175847
+Vaccmyrt 0.2406730 0.7593270
+Vaccviti 0.2110550 0.7889450
+Pinusylv 0.0060096 0.9939904
+\end{verbatim}
+
+\normalsize
+
+\end{frame}
+
+\begin{frame}[fragile]{Diagnostics for constrained ordinations
+\textbar{} species-environment correlations}
+
+\texttt{spenvcor()} returns the species-environment correlation
+
+The (weighted) correlation between the weighted average-based and the
+linear combination-based sets of site scores
+
+A \emph{poor} measure of goodness of fit. Sensitive to
+
+\begin{itemize}
+\itemsep1pt\parskip0pt\parsep0pt
+\item
+  outliers (like all correlations)
+\item
+  overfitting (using too many constraints)
+\end{itemize}
+
+Better models can have poorer species-environment correlations
+
+\scriptsize
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{spenvcor}\NormalTok{(mods)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+     CCA1      CCA2      CCA3 
+0.8554808 0.8132873 0.8792797 
+\end{verbatim}
+
+\normalsize
+
+\end{frame}
+
+\begin{frame}[fragile]{Diagnostics for constrained ordinations
+\textbar{} interset correlations}
+
+\texttt{intersetcor()} returns the interset correlations; the (weighted)
+correlation between the weighted average-based site scores and each
+constraint variable
+
+Another \emph{poor} diagnostic
+
+\begin{itemize}
+\itemsep1pt\parskip0pt\parsep0pt
+\item
+  correlation based
+\item
+  focuses on a single constraint--axis combination at a time
+\end{itemize}
+
+Vector fitting (\texttt{envfit()}) or biplot scores
+(\texttt{scores(model,\ display\ =\ "bp")}) are better alternatives
+
+\scriptsize
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{intersetcor}\NormalTok{(mods)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+         CCA1       CCA2      CCA3
+Al  0.7356151 -0.1302334 0.4259623
+P  -0.3589749 -0.6110772 0.4478933
+K  -0.3768462 -0.1339192 0.7760441
+\end{verbatim}
+
+\normalsize
+
+\end{frame}
+
+\begin{frame}{Variance inflation factors}
+
+\emph{Linear} dependencies between constraints can be investigated via
+the \emph{variance inflation factor} or VIF
+
+VIF is a measure of how much the variance of \(\hat{\beta}_j\) is
+inflated by presence of other covariates
+
+Lots of rules of thumb
+
+\begin{itemize}
+\itemsep1pt\parskip0pt\parsep0pt
+\item
+  VIF \textgreater{}= 20 indicates \emph{strong collinearity} in
+  constraints
+\item
+  VIF \textgreater{}= 10 potentially of concern \& should be looked at
+\end{itemize}
+
+Computed via \texttt{vif.cca()}
 
 \end{frame}
 
